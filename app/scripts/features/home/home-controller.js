@@ -1,0 +1,60 @@
+define([
+  'require',
+  'lodash',
+  'backbone',
+  'scripts/features/home/home-view',
+  'scripts/models/services/trello-service',
+  'scripts/models/trello'
+],
+function(){
+
+  'use strict';
+
+  var _ = require('lodash');
+  var Backbone = require('backbone');
+  var HomeView = require('scripts/features/home/home-view');
+  var TrelloService = require('scripts/models/services/trello-service');
+  var TrelloModel = require('scripts/models/trello');
+
+  var HomeController = function(){
+    this.initialize(arguments);
+  };
+
+  HomeController.prototype = _.extend({
+    initialize: function(options) {
+      console.log(['home controller initialize',options]);
+      this.view = new HomeView({controller: this});
+
+      this.trelloService = new TrelloService();
+      this.trelloModel = new TrelloModel();
+      this.domainModel = window.domainModel;
+      this.listenTo(this.domainModel,'change',this.notifyView);
+    },
+
+    renderView: function(){
+      this.view.render();
+    },
+
+    notifyView: function() {
+      // push mediated values into the view
+      this.view.model.set(this.domainModel.attributes);
+    },
+
+    trelloAuth: function() {
+      this.trelloModel.auth();
+    },
+
+    listBoards: function() {
+      this.trelloModel.fetchBoards();
+    },
+
+    listCards: function() {
+      this.trelloModel.fetchCards();
+    }
+
+
+
+  },Backbone.Events);
+
+  return HomeController;
+});

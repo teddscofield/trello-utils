@@ -1,0 +1,26 @@
+
+html {
+  font-family: Verdana,Arial,sans-serif;
+}
+
+.page-title {
+  margin: auto;
+  text-align: center;
+  padding: 5 0;
+  font-size: 24pt;
+}
+
+.trello-buttons {
+  margin-left: 5px;
+  height: 22px;
+}
+.trello-buttons div {
+  float: left;
+  width: 100px;
+  height: 20px;
+  background-color: #0a0
+}
+
+.gap-right {
+   margin-right: 2px;
+}

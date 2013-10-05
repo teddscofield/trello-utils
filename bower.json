@@ -1,0 +1,14 @@
+{
+  "name": "javascript-devel-boilerplate",
+  "version": "0.0.0",
+  "main": "app/main.js",
+  "ignore": [
+  ],
+  "dependencies": {
+    "requirejs": "latest",
+    "lodash": "latest",
+    "jquery": "latest",
+    "backbone": "latest",
+    "handlebars": "latest"
+  }
+}
