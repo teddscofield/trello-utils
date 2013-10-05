@@ -14,10 +14,9 @@ to write for a little while now.
 ## Trello API and SPA experimentation
 
 Currently the project just authorizes a user and fetches the boards
-and cards for a configured orginization within Trello.  
-
-The focus has been to get the project stack and organization
-established. Nothing more.  
+and cards for a configured orginization within Trello. The focus has
+been to get the project stack and organization established. Nothing
+more.  
 
 At this point this is working so I've put it on github.
 
@@ -26,12 +25,10 @@ At this point this is working so I've put it on github.
 
 The projects I work on have cards in multiple boards.  I want a way
 to setup a master prioritization of the cards that matter to the
-client, team, my boss or whomever.
-
-The idea is to query all cards within an organization and present
-them as a single list.  A user will then drag stories to a
-prioritization list and order them from most important to least
-important.
+client, team, my boss or whomever. The idea is to query all cards 
+within an organization and present them as a single list.  A user
+will then drag stories to a prioritization list and order them from
+most important to least important.
 
 The order can be persisted a number of ways: local storage, external
 database or possibly within a card in a Trello board.  First
@@ -67,3 +64,13 @@ cards together:
     card to indiciate it has been consolidated including the short
     URL of the new card to facilitate forward linking.
   * Archive the source cards when consolidation completes.
+
+## Other Possiblities
+
+  * Port tools, when working, to a Chrome plugin
+  * Story points stored as a comment on a story card
+  * Export data to various formats and data stores such as plain 
+    text XML, JSON, CSV
+  * Integrate burn down charting
+
+
