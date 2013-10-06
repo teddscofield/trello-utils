@@ -85,10 +85,10 @@ function(){
               app.get('boardNames')[object.name] = object.id;
             });
 
-            console.log('Board Names');
-            _.each(app.get('boardNames'),function(v,i){
-              console.log('  '+i+' '+v);
-            });
+            // console.log('Board Names');
+            // _.each(app.get('boardNames'),function(v,i){
+            //   console.log('  '+i+' '+v);
+            // });
 
             def.resolve();
           });
@@ -103,9 +103,24 @@ function(){
 
     loadCards: function() {
 
+      console.log('trelloServce#loadCards() starting');
       var def = $.Deferred();
       var org = app.get('targetOrganization');
-      app.set({ cards: {}, cardNames: {} });
+
+      // some kind of odd timing thing going here.
+      // not seeing values after this loads cards call
+      // because apparentlysomething is re-running this
+      // and blanking out the cards object due to
+      // this here set call:
+      // app.set({ cards: {}, cardNames: {} });
+
+      if ( ! app.get('cards') ) {
+        app.set('cards',{});
+      }
+      if ( ! app.get('cardNames') ) {
+        app.set('cardNames',{});
+      }
+
       var boards = app.get('boards');
       var that = this;
       $.Deferred().resolve()
@@ -113,22 +128,30 @@ function(){
           return that.oauthPopup();
         })
         .then(function(){
-
-          _.each(boards,function(object,index,array){
+          var count = 0;
+          var e = _.each(boards,function(object,index,array){
             var res = 'boards/'+object.id+'/cards';
-            Trello.get(res,function(cardsArray){
-              console.log('Cards for ['+object.name+']');
-              console.log(cardsArray);
+            count++; console.log('count increment '+count);
+            var g = Trello.get(res,function(cardsArray){
+              count--; console.log('count decrement '+ count);
+              //console.log('Cards for ['+object.name+']');
+              //console.log(cardsArray);
 
+              console.log('trelloService setting card data');
               _.each(cardsArray,function(object,index,array) {
                 app.get('cards')[object.id] = object;
                 app.get('cardNames')[object.name] = object.id;
               });
+              if (count === 0) {
+                console.log('count is zero, resolve deferred');
+                def.resolve();
 
-              console.log([app.get('cardNames')]);
-              def.resolve();
+              }
+
+              // console.log([app.get('cardNames')]);
             });
           });
+          console.log(['each board',e]);
 
         });
 

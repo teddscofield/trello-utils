@@ -2,19 +2,23 @@ define([
   'require',
   'lodash',
   'backbone',
+  'jquery',
   'scripts/features/home/home-view',
   'scripts/models/services/trello-service',
-  'scripts/models/trello'
+  'scripts/models/trello',
+  'scripts/view/card-list-basic-view'
 ],
 function(){
 
   'use strict';
 
   var _ = require('lodash');
+  var $ = require('jquery');
   var Backbone = require('backbone');
   var HomeView = require('scripts/features/home/home-view');
   var TrelloService = require('scripts/models/services/trello-service');
   var TrelloModel = require('scripts/models/trello');
+  var CardListBasicView = require('scripts/view/card-list-basic-view');
 
   var HomeController = function(){
     this.initialize(arguments);
@@ -46,11 +50,27 @@ function(){
     },
 
     listBoards: function() {
+
       this.trelloModel.fetchBoards();
     },
 
     listCards: function() {
-      this.trelloModel.fetchCards();
+      console.log('list called called');
+      var cardListBasicView = new CardListBasicView();
+
+      var that = this;
+      $.Deferred().resolve()
+      .then(function(){
+        console.log('fetching cards');
+        return that.trelloModel.fetchCards();
+      })
+      .then(function(){
+        console.log('displaing cards');
+        cardListBasicView.displayCards();
+      });
+
+      cardListBasicView.render();
+      $('.sortable').sortable();
     }
 
 

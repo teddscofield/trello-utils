@@ -39,6 +39,8 @@ define([
 
     fetchCards: function() {
 
+      var def = $.Deferred();
+
       var that = this;
       $.Deferred().resolve()
         .then(function(){
@@ -56,11 +58,13 @@ define([
         })
         .then(function(){
           console.log('Loading card data');
-          that.trelloService.loadCards();
+          return that.trelloService.loadCards();
         })
         .then(function(){
           console.log('Done loading all board and card data');
+          def.resolve();
         });
+      return def;
     }
 
 

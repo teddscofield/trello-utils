@@ -47,6 +47,7 @@ function(){
     },
 
     listCardsButtonClick: function() {
+      console.log('list cards click');
       this.controller.listCards();
     }
 
