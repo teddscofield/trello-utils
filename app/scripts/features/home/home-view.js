@@ -4,7 +4,8 @@ define([
   'lodash',
   'backbone',
   'jquery-sortable',
-  'JST'
+  'JST',
+  'scripts/view/base-view'
 ],
 function(){
 
@@ -12,35 +13,29 @@ function(){
   var $ = require('jquery'),
     _ = require('lodash'),
     JST = require('JST'),
-    Backbone = require('backbone');
-  
-  var HomeView = Backbone.View.extend({
+    Backbone = require('backbone'),
+    BaseView = require('scripts/view/base-view');
+
+  var HomeView = BaseView.extend({
 
     initialize: function(options){
+      BaseView.prototype.initialize.call(this,options);
 
-      // Backbone.View object setup
       this.$el = $('.main-content');
-      this.model = new Backbone.Model({name: 'default name'});
+      this.template = JST['app/templates/trello-buttons.html'];
+      this.model.set({
+        //name: 'default name'
+      });
+
       this.events = {
         'click .trello-auth': 'authButtonClick',
         'click .trello-list-boards': 'listBoardsButtonClick',
         'click .trello-list-cards': 'listCardsButtonClick',
       };
 
-      // bind render to changes in view data
-      this.listenTo(this.model,'change',this.render);
-
-      // custom
       this.controller = options.controller;
-      this.template = JST['app/templates/trello-buttons.html'];
       $('.sortable').sortable();
 
-    },
-
-    render: function(){
-      var viewData = this.model.toJSON();
-      var viewMarkup = this.template( viewData );
-      this.$el.html(viewMarkup);
     },
 
     authButtonClick: function() {

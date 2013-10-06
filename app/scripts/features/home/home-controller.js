@@ -22,10 +22,8 @@ function(){
 
   HomeController.prototype = _.extend({
     initialize: function(options) {
-      console.log(['home controller initialize',options]);
-      this.view = new HomeView({controller: this});
 
-      this.trelloService = new TrelloService();
+      this.view = new HomeView({controller: this});
       this.trelloModel = new TrelloModel();
       this.domainModel = window.domainModel;
       this.listenTo(this.domainModel,'change',this.notifyView);
@@ -37,6 +35,9 @@ function(){
 
     notifyView: function() {
       // push mediated values into the view
+      // cheapest way to accomplish mediating data, pass through
+      // like this.  but when needed, this is the spot to customize
+      // data sent to the view object.
       this.view.model.set(this.domainModel.attributes);
     },
 
