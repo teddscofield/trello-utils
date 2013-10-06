@@ -28,7 +28,7 @@ function(){
         this.authInteractiveFatal : this.authStoredTokenError;
 
       Trello.authorize({
-        name: app.appName,
+        name: app.get('appName'),
         type: 'popup',
         success: function(){
           that.onAuthSuccess(def);
@@ -49,7 +49,7 @@ function(){
 
     onAuthSuccess: function(def) {
       console.log('trello service: onSuccess');
-      app.trelloAuthed = true;
+      app.set({ trelloAuthed: true });
       def.resolve();
     },
 
@@ -68,9 +68,8 @@ function(){
     loadBoards: function() {
 
       var def = $.Deferred();
-      var org = app.targetOrganization;
-      app.boards = {};
-      app.boardNames = {};
+      var org = app.get('targetOrganization');
+      app.set({ boards: {}, boardNames: {} });
       var res = 'organizations/'+org+'/boards';
       var that = this;
 
@@ -82,12 +81,12 @@ function(){
 
           Trello.get(res,function(boardsArray){
             _.each(boardsArray,function(object,idx,array){
-              app.boards[object.id] = object;
-              app.boardNames[object.name] = object.id;
+              app.get('boards')[object.id] = object;
+              app.get('boardNames')[object.name] = object.id;
             });
 
             console.log('Board Names');
-            _.each(app.boardNames,function(v,i){
+            _.each(app.get('boardNames'),function(v,i){
               console.log('  '+i+' '+v);
             });
 
@@ -105,10 +104,9 @@ function(){
     loadCards: function() {
 
       var def = $.Deferred();
-      var org = app.targetOrganization;
-      app.cards = {};
-      app.cardNames = {};
-      var boards = app.boards;
+      var org = app.get('targetOrganization');
+      app.set({ cards: {}, cardNames: {} });
+      var boards = app.get('boards');
       var that = this;
       $.Deferred().resolve()
         .then(function(){
@@ -123,11 +121,11 @@ function(){
               console.log(cardsArray);
 
               _.each(cardsArray,function(object,index,array) {
-                app.cards[object.id] = object;
-                app.cardNames[object.name] = object.id;
+                app.get('cards')[object.id] = object;
+                app.get('cardNames')[object.name] = object.id;
               });
 
-              console.log([app.cardNames]);
+              console.log([app.get('cardNames')]);
               def.resolve();
             });
           });

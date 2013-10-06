@@ -1,22 +1,22 @@
 define([
   'require',
-  'lodash'
+  'lodash',
+  'backbone'
 ],function(){
   'use strict';
 
   var _ = require('lodash');
-
-  var app = {
-    appName: 'Trello Utils',
-    targetOrganization: 'programtemplate',
-    boards: {},
-    get: function(key) {
-      return this[key];
+  var Backbone = require('backbone');
+  var App = Backbone.Model.extend({
+    defaults: {
+      appName: 'Trello Utils',
+      targetOrganization: 'programtemplate',
+      boards: {}
     }
-  };
+  });
 
   // expose app object to window.  primarily for debug purposes
-  window.app = app;
+  window.app = new App();
 
-  return app;
+  return window.app;
 });

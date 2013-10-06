@@ -44,7 +44,7 @@ define([
         .then(function(){
 
           var boardDataLoaded =
-            Object.keys(app.boards).length > 0 ? true : false;
+            Object.keys(app.get('boards')).length > 0 ? true : false;
 
           if (boardDataLoaded) {
             console.log('Board data already loaded');
