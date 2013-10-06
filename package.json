@@ -7,7 +7,6 @@
     "grunt-contrib-connect": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-contrib-jshint": "latest",
-    "grunt-contrib-handlebars": "latest",
-    "grunt-lib-phantomjs": "latest"
+    "grunt-contrib-handlebars": "latest"
   }
 }
