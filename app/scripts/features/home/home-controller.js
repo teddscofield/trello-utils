@@ -66,11 +66,22 @@ function(){
       })
       .then(function(){
         console.log('displaing cards');
-        cardListBasicView.displayCards();
+        return cardListBasicView.displayCards();
+      },function(){
+        console.log(['fail fetching cards',arguments]);
+        return $.Deferred().reject('REJECT forcing a reject result');
+      })
+      .then(function(){
+        console.log('render');
+        cardListBasicView.render();
+        console.log('enable sortable');
+        $('.sortable').sortable();
+      },function(){
+
+        console.log(['render? make sortable? are you nuts?',arguments]);
+
       });
 
-      cardListBasicView.render();
-      $('.sortable').sortable();
     }
 
 

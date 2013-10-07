@@ -20,7 +20,7 @@ function(){
 
   TrelloService.prototype = _.extend({
 
-    oauthPopup: function(doInteractiveOauth,defSupplied) {
+    auth: function(doInteractiveOauth,defSupplied) {
       var def = defSupplied || $.Deferred();
       var that = this;
       var interactiveOauth = doInteractiveOauth || false;
@@ -50,70 +50,83 @@ function(){
     onAuthSuccess: function(def) {
       console.log('trello service: onSuccess');
       app.set({ trelloAuthed: true });
-      def.resolve();
+      def.resolve('RESOLVE auth success');
     },
 
     authStoredTokenError: function(def) {
-      console.log('oauth fail using stored token, attempting interactive oauth');
+      console.log('auth fail using stored token, attempting interactive auth');
 
-      this.oauthPopup(true, def);
+      //this.auth(true, def);
+      def.reject('REJECT token based auth failed');
       return false;
     },
 
     authInteractiveFatal: function(def) {
-      console.log('giving up oauth attempts');
-      def.reject();
+      console.log('giving up auth attempts after trying token based and interactive authorizations');
+      def.reject('REJECT interactive auth error');
     },
 
+    // load board for an organization
     loadBoards: function() {
 
       var def = $.Deferred();
-      var org = app.get('targetOrganization');
-      app.set({ boards: {}, boardNames: {} });
-      var res = 'organizations/'+org+'/boards';
       var that = this;
 
-      $.Deferred().resolve()
-        .then(function(){
-          return that.oauthPopup();
-        })
-        .then(function(){
+      if ( ! app.get('boards') ) {
+        app.set('boards',{});
+      }
 
-          Trello.get(res,function(boardsArray){
-            _.each(boardsArray,function(object,idx,array){
-              app.get('boards')[object.id] = object;
-              app.get('boardNames')[object.name] = object.id;
-            });
+      if ( ! app.get('boardNames') ) {
+        app.set('boardNames',{});
+      }
 
-            // console.log('Board Names');
-            // _.each(app.get('boardNames'),function(v,i){
-            //   console.log('  '+i+' '+v);
-            // });
+      console.log(['TrelloService.loadBoards','#0 load cards starting',arguments]);
+      $.Deferred().resolve('RESOLVE begin load boards deferred chain')
+      .then(function(){
+        console.log(['TrelloService.loadBoards','#1 start auth',arguments]);
+        return that.auth();
+      })
+      .then(function(){
+        console.log(['TrelloService.loadBoards','#2 start getting board data',arguments]);
 
-            def.resolve();
+        var count = 0;
+        var org = app.get('targetOrganization');
+        var res = 'organizations/'+org+'/boards';
+        Trello.get(res,function(boardsArray){
+
+          count++;
+          _.each(boardsArray,function(object,idx,array){
+            count--;
+            app.get('boards')[object.id] = object;
+            app.get('boardNames')[object.name] = object.id;
+            if (count === 0) {
+              def.resolve('RESOLVE TrelloService.loadBoards finished loading board data');
+            }
           });
 
-        })
-        .fail(function(){
-          def.reject();
         });
+
+      },function(){
+        console.log(['TrelloService.loadBoards','#2f auth step failed',arguments]);
+        def.reject('REJECT auth when loading board data erroed');
+      })
+      .fail(function(){
+        console.log(['TrelloService.loadBoards','FAIL load boards failed',arguments]);
+        def.reject('REJECT fail during load boards deferred chain');
+      });
 
       return def;
     },
 
+
+    // load cards for each of the boards that has been
+    // loaded into the app thus far.
     loadCards: function() {
 
-      console.log('trelloServce#loadCards() starting');
       var def = $.Deferred();
-      var org = app.get('targetOrganization');
+      var that = this;
 
-      // some kind of odd timing thing going here.
-      // not seeing values after this loads cards call
-      // because apparentlysomething is re-running this
-      // and blanking out the cards object due to
-      // this here set call:
-      // app.set({ cards: {}, cardNames: {} });
-
+      // initialize app cards and cardNames objects
       if ( ! app.get('cards') ) {
         app.set('cards',{});
       }
@@ -121,39 +134,43 @@ function(){
         app.set('cardNames',{});
       }
 
-      var boards = app.get('boards');
-      var that = this;
-      $.Deferred().resolve()
-        .then(function(){
-          return that.oauthPopup();
-        })
-        .then(function(){
-          var count = 0;
-          var e = _.each(boards,function(object,index,array){
-            var res = 'boards/'+object.id+'/cards';
-            count++; console.log('count increment '+count);
-            var g = Trello.get(res,function(cardsArray){
-              count--; console.log('count decrement '+ count);
-              //console.log('Cards for ['+object.name+']');
-              //console.log(cardsArray);
+      console.log(['TrelloService.loadCards','#0 load cards starting']);
+      $.Deferred().resolve('RESOLVE begin load cards deferred chain')
+      .then(function(){
+        console.log(['TrelloService.loadCards','#1 start auth',arguments]);
+        return that.auth();
+      })
+      .then(function(){
 
-              console.log('trelloService setting card data');
-              _.each(cardsArray,function(object,index,array) {
-                app.get('cards')[object.id] = object;
-                app.get('cardNames')[object.name] = object.id;
-              });
-              if (count === 0) {
-                console.log('count is zero, resolve deferred');
-                def.resolve();
+        console.log(['TrelloService.loadCards','#2 load cards for each board']);
+        
+        // iterate over each board.  need to keep count
+        // since lodash each() is async in order to tell
+        // when we are done.
+        var boards = app.get('boards');
+        var count = 0;
+        _.each(boards,function(object,index,array){
 
-              }
-
-              // console.log([app.get('cardNames')]);
+          // fetch card data for this board
+          var res = 'boards/'+object.id+'/cards';
+          count++;
+          Trello.get(res,function(cardsArray){
+            count--;
+            // assing card data to collection of cards
+            _.each(cardsArray,function(object,index,array) {
+              app.get('cards')[object.id] = object;
+              app.get('cardNames')[object.name] = object.id;
             });
+
+            // we're finished when the counter hits 0
+            if (count === 0) {
+              def.resolve();
+            }
           });
-          console.log(['each board',e]);
 
         });
+
+      });
 
       return def;
     }

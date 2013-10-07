@@ -6,10 +6,9 @@ define([
 
 ],function(){
 
-  var BaseView = require('scripts/view/base-view');
-  var _ = require('lodash');
-  var app = require('app');
-
+  var _ = require('lodash'),
+    app = require('app'),
+    BaseView = require('scripts/view/base-view');
 
   var CardListBasic = BaseView.extend({
 

@@ -21,14 +21,14 @@ define([
     auth: function() {
       var def = $.Deferred();
       var that = this;
-      this.trelloService.oauthPopup()
+      this.trelloService.auth()
         .done(function(){
-          console.log('cool, oauth passed');
-          def.resolve();
+          console.log('cool, auth passed');
+          def.resolve('RESOLVE TrelloModel.auth success');
         })
         .fail(function(){
-          console.log('eep oauth failed');
-          def.reject();
+          console.log('eep auth failed');
+          def.reject('RESOLVE TrelloModel.auth failed');
         });
       return def;
     },
@@ -40,30 +40,46 @@ define([
     fetchCards: function() {
 
       var def = $.Deferred();
-
       var that = this;
-      $.Deferred().resolve()
-        .then(function(){
 
-          var boardDataLoaded =
-            Object.keys(app.get('boards')).length > 0 ? true : false;
 
-          if (boardDataLoaded) {
-            console.log('Board data already loaded');
-            return $.Deferred().resolve();
-          }
-          
-          console.log('Loading board data');
-          return that.trelloService.loadBoards();
-        })
-        .then(function(){
-          console.log('Loading card data');
-          return that.trelloService.loadCards();
-        })
-        .then(function(){
-          console.log('Done loading all board and card data');
-          def.resolve();
-        });
+      // begin deferred execution chain to load first
+      // board data then card data.
+      $.Deferred().resolve('RESOLVE begine load board, card data')
+
+      // check that board data has been loaded.
+      // load from trello if need be.
+      .then(function(){
+        console.log(['start load board data',arguments]);
+        var boardDataLoaded =
+          Object.keys(app.get('boards')).length > 0 ? true : false;
+
+        if (boardDataLoaded) {
+          return $.Deferred().resolve('RESOLVE board data already loaded');
+        }
+        
+        console.log('Loading board data');
+        return that.trelloService.loadBoards();
+      })
+
+      // load card data from trello
+      // TODO: add check to see if data is already loaded
+      .then(function(){
+        console.log(['start load card data',arguments]);
+        return that.trelloService.loadCards();
+      },function(){
+        console.log(['failed to load board data',arguments]);
+        return def.reject('REJECT failed to load board data');
+      })
+
+      // signal to caller that data load is complete by
+      // resolving the deferred object returned by this method
+      .then(function(){
+        def.resolve();
+      },function(){
+        console.log('ahhh F it, I give up');
+      });
+
       return def;
     }
 
